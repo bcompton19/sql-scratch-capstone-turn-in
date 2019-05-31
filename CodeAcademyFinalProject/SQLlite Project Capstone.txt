@@ -1,0 +1,216 @@
+﻿1A:
+	
+SELECT COUNT(DISTINCT utm_campaign) AS 'Campaigns'
+FROM page_visits;
+
+SELECT COUNT(DISTINCT utm_source) AS 'Sources'
+FROM page_visits;
+
+How are they related?
+
+SELECT DISTINCT page_name AS 'page_name', utm_campaign, utm_source
+FROM page_visits;
+
+
+1B:
+SELECT DISTINCT page_name AS 'page_name'
+FROM page_visits;
+
+
+2A: How many first touches is each campaign responsible for?
+
+
+WITH first_touch AS (
+    SELECT user_id,
+        MIN(timestamp) as first_touch_at
+    FROM page_visits
+    GROUP BY user_id)
+SELECT ft.user_id,
+    ft.first_touch_at,
+    pv.utm_source,
+    pv.utm_campaign,
+COUNT (*) AS 'First Touches Per Campaign'
+FROM first_touch ft
+JOIN page_visits pv
+    ON ft.user_id = pv.user_id
+    AND ft.first_touch_at = pv.timestamp
+    GROUP BY 4
+    ORDER BY 5 DESC;
+
+
+
+	
+2B: How many last touches is each campaign responsible for?
+
+WITH last_touch AS (
+    SELECT user_id,
+        MAX(timestamp) as last_touch_at
+    FROM page_visits
+    GROUP BY user_id)
+SELECT lt.user_id,
+    lt.last_touch_at,
+    pv.utm_source,
+    pv.utm_campaign,
+COUNT (*) AS 'Last Touches Per Campaign'
+FROM last_touch lt
+JOIN page_visits pv
+    ON lt.user_id = pv.user_id
+    AND lt.last_touch_at = pv.timestamp
+    GROUP BY 4
+    ORDER BY 5 DESC;
+	
+	
+	
+2C:How many visitors make a purchase?
+
+
+SELECT COUNT (*) AS 'Count'
+FROM page_visits
+WHERE page_name = '4 - purchase';
+
+	
+	
+2D:How many last touches on the purchase page is each campaign responsible for?	
+	
+WITH last_touch AS (
+    SELECT user_id,
+        MAX(timestamp) as last_touch_at
+    FROM page_visits
+    GROUP BY user_id)
+SELECT lt.user_id,
+    lt.last_touch_at,
+    pv.utm_source,
+    pv.utm_campaign,
+COUNT (*) AS 'Last Touches Per Campaign On Purchase Page',
+pv.page_name
+  
+FROM last_touch lt
+ 
+JOIN page_visits pv
+    ON lt.user_id = pv.user_id
+    AND lt.last_touch_at = pv.timestamp
+        WHERE page_name = '4 - purchase'
+    GROUP BY 4;
+
+
+	
+2E: What is the typical user journey?	
+		
+SELECT page_name,
+COUNT (page_name) AS 'COUNT'
+FROM page_visits
+GROUP BY 1
+;
+
+	Query Results
+page_name	COUNT
+1 - landing_page	2000
+2 - shopping_cart	1900
+3 - checkout	1431
+4 - purchase	361
+	
+
+
+WITH first_touch AS (
+    SELECT user_id,
+        MIN(timestamp) as first_touch_at
+    FROM page_visits
+    GROUP BY user_id)
+SELECT ft.user_id,
+    ft.first_touch_at,
+    pv.utm_source,
+    pv.utm_campaign,
+COUNT (*) AS 'First Touches Per Campaign'
+FROM first_touch ft
+JOIN page_visits pv
+    ON ft.user_id = pv.user_id
+    AND ft.first_touch_at = pv.timestamp
+    GROUP BY 4
+    ORDER BY 5 DESC;
+
+
+
+    
+WITH last_touch AS (
+    SELECT user_id,
+        MAX(timestamp) as last_touch_at
+    FROM page_visits
+    GROUP BY user_id)
+SELECT lt.user_id,
+    lt.last_touch_at,
+    pv.utm_source,
+    pv.utm_campaign,
+COUNT (*) AS 'Last Touches Per Campaign'
+FROM last_touch lt
+JOIN page_visits pv
+    ON lt.user_id = pv.user_id
+    AND lt.last_touch_at = pv.timestamp
+    GROUP BY 4
+    ORDER BY 5 DESC;
+    
+    
+    
+    
+WITH last_touch AS (
+    SELECT user_id,
+        MAX(timestamp) as last_touch_at
+    FROM page_visits
+    GROUP BY user_id)
+SELECT lt.user_id,
+    lt.last_touch_at,
+    pv.utm_source,
+    pv.utm_campaign,
+COUNT (*) AS 'Last Touches On Purch Pge'
+  FROM last_touch lt
+ JOIN page_visits pv
+    ON lt.user_id = pv.user_id
+    AND lt.last_touch_at = pv.timestamp
+        WHERE page_name = '4 - purchase'
+    GROUP BY 4
+   ORDER BY 5 DESC ;
+	  
+	  
+3: Optimize the campaign budget CoolTShirts can re-invest in 5 campaigns. Which should they pick and why?	  
+	  
+SELECT page_name,
+COUNT (DISTINCT CASE
+      WHEN utm_campaign = 'cool-tshirts-search' THEN user_id
+      END) AS 'Cool-shirts',
+       COUNT (DISTINCT CASE
+              WHEN utm_campaign = 'getting-to-know-cool-tshirts' THEN user_id
+              END) AS 'Getting to Know',
+               COUNT (DISTINCT CASE
+              WHEN utm_campaign = 'interview-with-cool-tshirts-founder' THEN user_id
+              END) AS 'Interview',
+               COUNT (DISTINCT CASE
+              WHEN utm_campaign = 'ten-crazy-cool-tshirts' THEN user_id
+              END) AS '10 Crazy',
+               COUNT (DISTINCT CASE
+              WHEN utm_campaign = 'paid-search' THEN user_id
+              END) AS 'Paid',
+               COUNT (DISTINCT CASE
+              WHEN utm_campaign = 'retargeting-ad' THEN user_id
+              END) AS 'Retarget',
+               COUNT (DISTINCT CASE
+              WHEN utm_campaign = 'weekly-newsletter' THEN user_id
+              END) AS 'Newsletter',
+               COUNT (DISTINCT CASE
+              WHEN utm_campaign = 'retargeting-campaign' THEN user_id
+              END) AS 'Retarget Campaign'
+                      
+      FROM page_visits
+      GROUP BY 1
+      ORDER BY 2 DESC;
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
